@@ -30,14 +30,13 @@ if __name__ == "__main__":
 
     user_id = "154092236@N05"
 
+    start_page = 57
+
     replace_map = {}
-    replace_map["クリエイティブ・コモンズ 表示-非営利-継承 4.0 国際ライセンス（CC BY-NC-SA）"] = "クリエイティブ・コモンズ 表示 4.0 国際ライセンス（CC BY）";
-    replace_map[
-        "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja"] = "https://creativecommons.org/licenses/by/4.0/deed.ja";
-    replace_map[
-        "the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)"] = "the Creative Commons Attribution 4.0 International (CC BY 4.0)";
-    replace_map[
-        '<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="nofollow">creativecommons.org/licenses/by-nc-sa/4.0/deed.en</a>'] = '<a href="https://creativecommons.org/licenses/by/4.0/deed.en" rel="nofollow">creativecommons.org/licenses/by/4.0/deed.en</a>';
+    replace_map["表示-非営利-継承"] = "表示"
+    replace_map["CC BY-NC-SA"] = "CC BY"
+    replace_map["by-nc-sa"] = "by"
+    replace_map["Attribution-NonCommercial-ShareAlike"] = "Attribution"
 
     inifile = configparser.ConfigParser()
     inifile.read('./config.ini', 'UTF-8')
@@ -61,7 +60,8 @@ if __name__ == "__main__":
         api.get_access_token(verifier)
 
     flg = True
-    page = 1
+
+    page = start_page
 
     while flg:
         res = api.people.getPhotos(
@@ -78,21 +78,19 @@ if __name__ == "__main__":
 
         print(page_status)
 
-        page += 1
+        for i in range(len(photo_list)):
+            photo = photo_list[i]
 
-        if len(photo_list) > 0:
+            photo_id = photo["id"]
 
-            for i in range(len(photo_list)):
-                photo = photo_list[i]
+            photo_status = str(i + 1) + "/" + str(len(photo_list))
 
-                photo_id = photo["id"]
+            print(photo_status + "\t" + photo_id + "\t" + photo["title"])
 
-                photo_status = str(i + 1) + "/" + str(len(photo_list))
+            update_description(photo_id)
+            update_license(photo_id)
 
-                print(photo_status + "\t" + photo_id + "\t" + photo["title"])
-
-                update_description(photo_id)
-                update_license(photo_id)
-
+        if page != pages:
+            page += 1
         else:
             flg = False
